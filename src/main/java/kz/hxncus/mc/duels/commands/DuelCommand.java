@@ -45,7 +45,7 @@ public class DuelCommand extends AbstractCommand{
             case "accept":
                 if (needToWriteName(args, player, duelPrefix + "§cНапишите никнейм игрока от которого пришёл запрос.")) return;
                 if (isPlayerOffline(args[1], player)) return;
-                if(!playerChecks.containsInvites(args[1])) {
+                if(playerChecks.containsInvites(args[1])) {
                     player.sendMessage(duelPrefix + "§cЭтот игрок не отправлял вам запрос.");
                     return;
                 }
@@ -55,7 +55,7 @@ public class DuelCommand extends AbstractCommand{
             case "deny":
                 if (needToWriteName(args, player, duelPrefix + "§cНапишите никнейм игрока от которого пришёл запрос.")) return;
                 if (isPlayerOffline(args[1], player)) return;
-                if(!playerChecks.containsInvites(args[1])) {
+                if(playerChecks.containsInvites(args[1])) {
                     player.sendMessage(duelPrefix + "§cЭтот игрок не отправлял вам запрос.");
                     return;
                 }
@@ -76,15 +76,13 @@ public class DuelCommand extends AbstractCommand{
 
     private boolean checkDuelsQueue(Player player, PlayerChecks playerChecks) {
         DuelsQueue duelsQueue = playerChecks.getQueue();
-        if (duelsQueue != null) {
-            if (!duelsQueue.isPlayerInGame(player)) {
-                player.sendMessage(duelPrefix + "§cЗапрещено использовать эту команду во время игры.");
-                return true;
-            }
-            if (!duelsQueue.isPlayerInQueue(player)) {
-                player.sendMessage(duelPrefix + "§cЗапрещено использовать эту команду во время поиска игры.");
-                return true;
-            }
+        if (duelsQueue != null && !duelsQueue.isPlayerInGame(player)) {
+            player.sendMessage(duelPrefix + "§cЗапрещено использовать эту команду во время игры.");
+            return true;
+        }
+        if (duelsQueue != null && !duelsQueue.isPlayerInQueue(player)) {
+            player.sendMessage(duelPrefix + "§cЗапрещено использовать эту команду во время поиска игры.");
+            return true;
         }
         return false;
     }
