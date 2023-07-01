@@ -42,19 +42,17 @@ public class DuelCommand extends AbstractCommand{
                 return;
             }
         }
-        String subCommand = args[0];
-        switch (subCommand.toLowerCase()) {
+        switch (args[0].toLowerCase()) {
             case "invite":
                 if (args.length < 2) {
                     player.sendMessage("§7[§aDuel§7] §cНапишите никнейм игрока которому хотите отправить запрос.");
                     return;
                 }
-                String targetName = args[1];
-                Player invited = Bukkit.getPlayer(args[1]);
-                if (invited == null) {
+                if (Bukkit.getPlayer(args[1]) == null) {
                     player.sendMessage("§7[§aDuel§7] §cИгрок оффлайн");
                     return;
                 }
+                String targetName = args[1];
                 if (targetName.equals(player.getName())) {
                     player.sendMessage("§7[§aDuel§7] §cНельзя отправить запрос самому себе.");
                     return;
@@ -66,8 +64,9 @@ public class DuelCommand extends AbstractCommand{
                     player.sendMessage("§7[§aDuel§7] §cНапишите никнейм игрока от которого пришёл запрос.");
                     return;
                 }
-                Player inviter = Bukkit.getPlayer(args[1]);
-                if (inviter == null) {
+                Player invite = Bukkit.getPlayer(args[1]);
+                String inviter = args[1];
+                if (invite == null) {
                     player.sendMessage("§7[§aDuel§7] §cИгрок оффлайн");
                     return;
                 }
@@ -75,16 +74,15 @@ public class DuelCommand extends AbstractCommand{
                     player.sendMessage("§7[§aDuel§7] §cЭтот игрок не отправлял вам запрос.");
                     return;
                 }
-                DuelsQueue duelsQueue1 = playerChecks.getKeyInvites(inviter);
+                playerChecks.getKeyInvites(inviter).startGame(invite, player);
                 playerChecks.removeInvites(inviter);
-                duelsQueue1.startGame(inviter, player);
             case "deny":
                 if (args.length < 2) {
                     player.sendMessage("§7[§aDuel§7] §cНапишите никнейм игрока от которого пришёл запрос.");
                     return;
                 }
-                inviter = Bukkit.getPlayer(args[1]);
-                if (inviter == null) {
+                inviter = args[1];
+                if (Bukkit.getPlayer(args[1]) == null) {
                     player.sendMessage("§7[§aDuel§7] §cИгрок оффлайн");
                     return;
                 }
@@ -101,8 +99,7 @@ public class DuelCommand extends AbstractCommand{
                 }
                 long startMillis = System.currentTimeMillis();
                 Duels.getInstance().reloadConfig();
-                long endMillis = System.currentTimeMillis();
-                player.sendMessage("§7[§aDuel§7] §fКонфиг перезагружен за " + (endMillis - startMillis) + "ms.");
+                player.sendMessage("§7[§aDuel§7] §fКонфиг перезагружен за " + (System.currentTimeMillis() - startMillis) + "ms.");
         }
     }
     @Override
@@ -111,15 +108,9 @@ public class DuelCommand extends AbstractCommand{
         else if(args.length == 2) {
             List<String> players = new ArrayList<>();
             if(args[0].equalsIgnoreCase("invite")){
-                for (Player player : Bukkit.getOnlinePlayers()){
-                    if(player != sender) {
-                        players.add(player.getName());
-                    }
-                }
+                Bukkit.getOnlinePlayers().stream().filter(player -> player != sender).forEach(player -> players.add(player.getName()));
             }else if(args[0].equalsIgnoreCase("accept") || args[0].equalsIgnoreCase("deny")){
-                for (Player player : Duels.getPlayerChecks().get((Player) sender).getKeySetInvites()){
-                    players.add(player.getName());
-                }
+                players.addAll(Duels.getPlayerChecks().get((Player) sender).getKeySetInvites());
             }
             return players;
         }
