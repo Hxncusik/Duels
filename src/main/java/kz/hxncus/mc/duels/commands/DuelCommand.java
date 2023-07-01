@@ -12,7 +12,6 @@ import org.bukkit.inventory.Inventory;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class DuelCommand extends AbstractCommand{
     public DuelCommand() { super("duel"); }
