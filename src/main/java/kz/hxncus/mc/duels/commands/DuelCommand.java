@@ -59,6 +59,7 @@ public class DuelCommand extends AbstractCommand{
                 }
                 Inventory inventory = DuelsInventory.getInventory("1.9+ Запрос игроку " + targetName);
                 player.openInventory(inventory);
+                break;
             case "accept":
                 if (args.length < 2) {
                     player.sendMessage("§7[§aDuel§7] §cНапишите никнейм игрока от которого пришёл запрос.");
@@ -76,6 +77,7 @@ public class DuelCommand extends AbstractCommand{
                 }
                 playerChecks.getKeyInvites(inviter).startGame(invite, player);
                 playerChecks.removeInvites(inviter);
+                break;
             case "deny":
                 if (args.length < 2) {
                     player.sendMessage("§7[§aDuel§7] §cНапишите никнейм игрока от которого пришёл запрос.");
@@ -91,8 +93,10 @@ public class DuelCommand extends AbstractCommand{
                     return;
                 }
                 playerChecks.removeInvites(inviter);
+                break;
             case "menu":
                 player.openInventory(DuelsInventory.getInventory("Дуэли 1.9+ пвп"));
+                break;
             case "reload":
                 if (!player.hasPermission("duel.reload")) {
                     player.sendMessage("§7[§aDuel§7] §cНедостаточно прав");
@@ -100,6 +104,7 @@ public class DuelCommand extends AbstractCommand{
                 long startMillis = System.currentTimeMillis();
                 Duels.getInstance().reloadConfig();
                 player.sendMessage("§7[§aDuel§7] §fКонфиг перезагружен за " + (System.currentTimeMillis() - startMillis) + "ms.");
+                break;
         }
     }
     @Override
