@@ -139,19 +139,19 @@ public class EventListener implements Listener {
         String queueName = "null";
         if (item.getItemMeta().getDisplayName().contains("§fАлмазник")) {
             queueName = "diamond9kit";
-            if (inventoryName.contains("Дуэли 1.8 пвп")) {
+            if (inventoryName.contains("Дуэли 1.8 пвп") || inventoryName.contains("1.8 Запрос игроку")) {
                 queueName = "diamond8kit";
             }
             duelsQueue = getOrCreateDuelsQueue(queues, queueName, 16, 1);
         } else if (item.getItemMeta().getDisplayName().contains("§fЖелезник")) {
             queueName = "iron9kit";
-            if (inventoryName.contains("Дуэли 1.8 пвп")) {
+            if (inventoryName.contains("Дуэли 1.8 пвп") || inventoryName.contains("1.8 Запрос игроку")) {
                 queueName = "iron8kit";
             }
             duelsQueue = getOrCreateDuelsQueue(queues, queueName, 16, 1);
         } else if (item.getItemMeta().getDisplayName().contains("§fЛучник")) {
             queueName = "bow9kit";
-            if (inventoryName.contains("Дуэли 1.8 пвп")) {
+            if (inventoryName.contains("Дуэли 1.8 пвп") || inventoryName.contains("1.8 Запрос игроку")) {
                 queueName = "bow8kit";
             }
             duelsQueue = getOrCreateDuelsQueue(queues, queueName, 16, 1);
@@ -166,22 +166,6 @@ public class EventListener implements Listener {
         }
         Player getter = Bukkit.getPlayer(inventoryName.split(" ")[3]);
         PlayerChecks playerChecks = Duels.getPlayerChecks().get(getter);
-        if (item.getItemMeta().getDisplayName().contains("§fАлмазник")) {
-            queueName = "diamond9kit";
-            if (inventoryName.contains("1.8 Запрос игроку")) {
-                queueName = queueName.replace("9", "8");
-            }
-        } else if (item.getItemMeta().getDisplayName().contains("§fЖелезник")) {
-            queueName = "iron9kit";
-            if (inventoryName.contains("1.8 Запрос игроку")) {
-                queueName = queueName.replace("9", "8");
-            }
-        } else if (item.getItemMeta().getDisplayName().contains("§fЛучник")) {
-            queueName = "bow9kit";
-            if (inventoryName.contains("1.8 Запрос игроку")) {
-                queueName = queueName.replace("9", "8");
-            }
-        }
         if (queueName.equals("null")) {
             player.closeInventory();
             return;
