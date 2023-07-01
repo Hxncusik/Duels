@@ -33,33 +33,16 @@ public class DuelCommand extends AbstractCommand{
                 invite(args, player);
                 break;
             case "accept":
-                if (needToWriteName(args.length, player, duelPrefix + "§cНапишите никнейм игрока от которого пришёл запрос.")) return;
-                if (isPlayerOffline(args[1], player)) return;
-                if (playerChecks.containsInvites(args[1])) {
-                    player.sendMessage(duelPrefix + "§cЭтот игрок не отправлял вам запрос.");
-                    return;
-                }
-                playerChecks.getKeyInvites(args[1]).startGame(Bukkit.getPlayer(args[1]), player);
-                playerChecks.removeInvites(args[1]);
+                accept(args, player, playerChecks);
                 break;
             case "deny":
-                if (needToWriteName(args.length, player, duelPrefix + "§cНапишите никнейм игрока от которого пришёл запрос.")) return;
-                if (isPlayerOffline(args[1], player)) return;
-                if (playerChecks.containsInvites(args[1])) {
-                    player.sendMessage(duelPrefix + "§cЭтот игрок не отправлял вам запрос.");
-                    return;
-                }
-                playerChecks.removeInvites(args[1]);
+                deny(args, player, playerChecks);
                 break;
             case "menu":
                 player.openInventory(DuelsInventory.getInventory("Дуэли 1.9+ пвп"));
                 break;
             case "reload":
-                if (!player.hasPermission("duel.reload")) {
-                    player.sendMessage(duelPrefix + "§cНедостаточно прав");
-                }
-                Duels.getInstance().reloadConfig();
-                player.sendMessage(duelPrefix + "§fКонфиг успешно перезагружен.");
+                reload(player);
                 break;
             default:
                 sendDefaultHelpMessage(sender);
@@ -80,6 +63,32 @@ public class DuelCommand extends AbstractCommand{
             return;
         }
         player.openInventory(DuelsInventory.getInventory("1.9+ Запрос игроку " + args[1]));
+    }
+    private void accept(String[] args, Player player, PlayerChecks playerChecks) {
+        if (needToWriteName(args.length, player, duelPrefix + "§cНапишите никнейм игрока от которого пришёл запрос.")) return;
+        if (isPlayerOffline(args[1], player)) return;
+        if (playerChecks.containsInvites(args[1])) {
+            player.sendMessage(duelPrefix + "§cЭтот игрок не отправлял вам запрос.");
+            return;
+        }
+        playerChecks.getKeyInvites(args[1]).startGame(Bukkit.getPlayer(args[1]), player);
+        playerChecks.removeInvites(args[1]);
+    }
+    private void deny(String[] args, Player player, PlayerChecks playerChecks) {
+        if (needToWriteName(args.length, player, duelPrefix + "§cНапишите никнейм игрока от которого пришёл запрос.")) return;
+        if (isPlayerOffline(args[1], player)) return;
+        if (playerChecks.containsInvites(args[1])) {
+            player.sendMessage(duelPrefix + "§cЭтот игрок не отправлял вам запрос.");
+            return;
+        }
+        playerChecks.removeInvites(args[1]);
+    }
+    private void reload(Player player) {
+        if (!player.hasPermission("duel.reload")) {
+            player.sendMessage(duelPrefix + "§cНедостаточно прав");
+        }
+        Duels.getInstance().reloadConfig();
+        player.sendMessage(duelPrefix + "§fКонфиг успешно перезагружен.");
     }
     private boolean checkDuelsQueue(Player player, PlayerChecks playerChecks) {
         DuelsQueue duelsQueue = playerChecks.getQueue();
