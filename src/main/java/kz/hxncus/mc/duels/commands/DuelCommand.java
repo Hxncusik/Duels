@@ -30,16 +30,10 @@ public class DuelCommand extends AbstractCommand{
         if (checkDuelsQueue(player, playerChecks)) return;
         switch (args[0].toLowerCase()) {
             case "invite":
-                if (needToWriteName(args, player, duelPrefix + "§cНапишите никнейм игрока которому хотите отправить запрос.")) return;
-                if (isPlayerOffline(args[1], player)) return;
-                if (args[1].equals(player.getName())) {
-                    player.sendMessage(duelPrefix + "§cНельзя отправить запрос самому себе.");
-                    return;
-                }
-                player.openInventory(DuelsInventory.getInventory("1.9+ Запрос игроку " + args[1]));
+                invite(args, player);
                 break;
             case "accept":
-                if (needToWriteName(args, player, duelPrefix + "§cНапишите никнейм игрока от которого пришёл запрос.")) return;
+                if (needToWriteName(args.length, player, duelPrefix + "§cНапишите никнейм игрока от которого пришёл запрос.")) return;
                 if (isPlayerOffline(args[1], player)) return;
                 if (playerChecks.containsInvites(args[1])) {
                     player.sendMessage(duelPrefix + "§cЭтот игрок не отправлял вам запрос.");
@@ -49,7 +43,7 @@ public class DuelCommand extends AbstractCommand{
                 playerChecks.removeInvites(args[1]);
                 break;
             case "deny":
-                if (needToWriteName(args, player, duelPrefix + "§cНапишите никнейм игрока от которого пришёл запрос.")) return;
+                if (needToWriteName(args.length, player, duelPrefix + "§cНапишите никнейм игрока от которого пришёл запрос.")) return;
                 if (isPlayerOffline(args[1], player)) return;
                 if (playerChecks.containsInvites(args[1])) {
                     player.sendMessage(duelPrefix + "§cЭтот игрок не отправлял вам запрос.");
@@ -78,6 +72,15 @@ public class DuelCommand extends AbstractCommand{
                 duelPrefix + "§7/duel menu §8| §eОткрыть меню дуэлей\n" +
                 duelPrefix + "§7/duel reload §8| §eПерезагрузить конфигурацию");
     }
+    private void invite(String[] args, Player player) {
+        if (needToWriteName(args.length, player, duelPrefix + "§cНапишите никнейм игрока которому хотите отправить запрос.")) return;
+        if (isPlayerOffline(args[1], player)) return;
+        if (args[1].equals(player.getName())) {
+            player.sendMessage(duelPrefix + "§cНельзя отправить запрос самому себе.");
+            return;
+        }
+        player.openInventory(DuelsInventory.getInventory("1.9+ Запрос игроку " + args[1]));
+    }
     private boolean checkDuelsQueue(Player player, PlayerChecks playerChecks) {
         DuelsQueue duelsQueue = playerChecks.getQueue();
         if (duelsQueue != null && !duelsQueue.isPlayerInGame(player)) {
@@ -98,8 +101,8 @@ public class DuelCommand extends AbstractCommand{
         }
         return false;
     }
-    private boolean needToWriteName(String[] args, Player player, String text) {
-        if (args.length < 2) {
+    private boolean needToWriteName(int length, Player player, String text) {
+        if (length < 2) {
             player.sendMessage(text);
             return true;
         }
