@@ -25,47 +25,55 @@ public class DuelCommand extends AbstractCommand{
             return;
         }
         if(sender instanceof Player){
-            PlayerChecks playerChecks = Duels.getPlayerChecks().get(sender);
+            Player player = (Player) sender;
+            PlayerChecks playerChecks = Duels.getPlayerChecks().get(player);
             DuelsQueue duelsQueue = playerChecks.getQueue();
-            if(duelsQueue == null || !duelsQueue.isPlayerInGame((Player) sender) || !duelsQueue.isPlayerInQueue((Player) sender)) {
-                if (args[0].equalsIgnoreCase("invite") && args.length > 1) {
-                    Player player = Bukkit.getPlayer(args[1]);
-                    if (player != null && player != sender) {
-                        Inventory inventory = DuelsInventory.getInventory("1.9+ Запрос игроку " + player.getName());
-                        ((Player) sender).openInventory(inventory);
-                    } else if (player == null) {
-                        sender.sendMessage("§7[§aDuel§7] §cИгрок оффлайн");
-                    } else {
-                        sender.sendMessage("§7[§aDuel§7] §cНельзя отправить запрос самому себе.");
-                    }
-                } else if (args[0].equalsIgnoreCase("accept")) {
-                    Player player = Bukkit.getPlayer(args[1]);
-                    if (player != null) {
-                        if(playerChecks.containsInvites(player)) {
-                            DuelsQueue duelsQueue1 = playerChecks.getKeyInvites(player);
-                            playerChecks.removeInvites(player);
-                            duelsQueue1.startGame(player, (Player) sender);
-                        }
-                    } else {
-                        sender.sendMessage("§7[§aDuel§7] §cИгрок оффлайн");
-                    }
-                } else if (args[0].equalsIgnoreCase("deny")) {
-                    Player player = Bukkit.getPlayer(args[1]);
-                    if (player != null) {
-                        if(playerChecks.containsInvites(player)) {
-                            playerChecks.removeInvites(player);
-                        }
-                    } else {
-                        sender.sendMessage("§7[§aDuel§7] §cИгрок оффлайн");
-                    }
-                } else if (args[0].equalsIgnoreCase("menu")) {
-                    ((Player) sender).openInventory(DuelsInventory.getInventory("Дуэли 1.9+ пвп"));
-                } else if (args[0].equalsIgnoreCase("reload")) {
-                    if (sender.hasPermission("*")) {
-                        long millis = System.currentTimeMillis();
-                        Duels.getInstance().reloadConfig();
-                        sender.sendMessage("§7[§aDuel§7] §fКонфиг перезагружен за " + (System.currentTimeMillis() - millis) + "ms.");
-                    }
+            if (duelsQueue != null && !duelsQueue.isPlayerInGame(player) && !duelsQueue.isPlayerInQueue(player)) {
+                return;
+            }
+            if (args[0].equalsIgnoreCase("invite") && args.length > 1) {
+                Player invited = Bukkit.getPlayer(args[1]);
+                if (invited == null) {
+                    player.sendMessage("§7[§aDuel§7] §cИгрок оффлайн");
+                    return;
+                }
+                if (invited == player) {
+                    player.sendMessage("§7[§aDuel§7] §cНельзя отправить запрос самому себе.");
+                    return;
+                }
+                Inventory inventory = DuelsInventory.getInventory("1.9+ Запрос игроку " + invited.getName());
+                player.openInventory(inventory);
+            } else if (args[0].equalsIgnoreCase("accept")) {
+                Player inviter = Bukkit.getPlayer(args[1]);
+                if (inviter == null) {
+                    player.sendMessage("§7[§aDuel§7] §cИгрок оффлайн");
+                    return;
+                }
+                if(!playerChecks.containsInvites(inviter)) {
+                    player.sendMessage("§7[§aDuel§7] §cЭтот игрок не отправлял вам запрос.");
+                    return;
+                }
+                DuelsQueue duelsQueue1 = playerChecks.getKeyInvites(inviter);
+                playerChecks.removeInvites(inviter);
+                duelsQueue1.startGame(inviter, player);
+            } else if (args[0].equalsIgnoreCase("deny")) {
+                Player inviter = Bukkit.getPlayer(args[1]);
+                if (inviter == null) {
+                    player.sendMessage("§7[§aDuel§7] §cИгрок оффлайн");
+                    return;
+                }
+                if(!playerChecks.containsInvites(inviter)) {
+                    player.sendMessage("§7[§aDuel§7] §cЭтот игрок не отправлял вам запрос.");
+                    return;
+                }
+                playerChecks.removeInvites(inviter);
+            } else if (args[0].equalsIgnoreCase("menu")) {
+                player.openInventory(DuelsInventory.getInventory("Дуэли 1.9+ пвп"));
+            } else if (args[0].equalsIgnoreCase("reload")) {
+                if (player.hasPermission("*")) {
+                    long millis = System.currentTimeMillis();
+                    Duels.getInstance().reloadConfig();
+                    player.sendMessage("§7[§aDuel§7] §fКонфиг перезагружен за " + (System.currentTimeMillis() - millis) + "ms.");
                 }
             }
         }
