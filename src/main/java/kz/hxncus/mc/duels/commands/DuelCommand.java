@@ -22,11 +22,7 @@ public class DuelCommand extends AbstractCommand{
             return;
         }
         if (args.length == 0) {
-            sender.sendMessage(duelPrefix + "§7/duel invite <Никнейм> §8| §eОтправить запрос на дуэль игроку\n" +
-                    duelPrefix + "§7/duel accept <Никнейм> §8| §eПринять запрос на дуэль от игрока\n" +
-                    duelPrefix + "§7/duel deny <Никнейм> §8| §eОтклонить запрос на дуэль от игрока\n" +
-                    duelPrefix + "§7/duel menu §8| §eОткрыть меню дуэлей\n" +
-                    duelPrefix + "§7/duel reload §8| §eПерезагрузить конфигурацию");
+            sendDefaultHelpMessage(sender);
             return;
         }
         Player player = (Player) sender;
@@ -45,7 +41,7 @@ public class DuelCommand extends AbstractCommand{
             case "accept":
                 if (needToWriteName(args, player, duelPrefix + "§cНапишите никнейм игрока от которого пришёл запрос.")) return;
                 if (isPlayerOffline(args[1], player)) return;
-                if(playerChecks.containsInvites(args[1])) {
+                if (playerChecks.containsInvites(args[1])) {
                     player.sendMessage(duelPrefix + "§cЭтот игрок не отправлял вам запрос.");
                     return;
                 }
@@ -55,7 +51,7 @@ public class DuelCommand extends AbstractCommand{
             case "deny":
                 if (needToWriteName(args, player, duelPrefix + "§cНапишите никнейм игрока от которого пришёл запрос.")) return;
                 if (isPlayerOffline(args[1], player)) return;
-                if(playerChecks.containsInvites(args[1])) {
+                if (playerChecks.containsInvites(args[1])) {
                     player.sendMessage(duelPrefix + "§cЭтот игрок не отправлял вам запрос.");
                     return;
                 }
@@ -71,9 +67,17 @@ public class DuelCommand extends AbstractCommand{
                 Duels.getInstance().reloadConfig();
                 player.sendMessage(duelPrefix + "§fКонфиг успешно перезагружен.");
                 break;
+            default:
+                sendDefaultHelpMessage(sender);
         }
     }
-
+    private void sendDefaultHelpMessage(CommandSender sender) {
+        sender.sendMessage(duelPrefix + "§7/duel invite <Никнейм> §8| §eОтправить запрос на дуэль игроку\n" +
+                duelPrefix + "§7/duel accept <Никнейм> §8| §eПринять запрос на дуэль от игрока\n" +
+                duelPrefix + "§7/duel deny <Никнейм> §8| §eОтклонить запрос на дуэль от игрока\n" +
+                duelPrefix + "§7/duel menu §8| §eОткрыть меню дуэлей\n" +
+                duelPrefix + "§7/duel reload §8| §eПерезагрузить конфигурацию");
+    }
     private boolean checkDuelsQueue(Player player, PlayerChecks playerChecks) {
         DuelsQueue duelsQueue = playerChecks.getQueue();
         if (duelsQueue != null && !duelsQueue.isPlayerInGame(player)) {
@@ -104,7 +108,7 @@ public class DuelCommand extends AbstractCommand{
 
     @Override
     public List<String> complete(CommandSender sender, String[] args) {
-        if(args.length == 1) return Lists.newArrayList("accept", "deny", "invite", "menu", "reload");
+        if (args.length == 1) return Lists.newArrayList("accept", "deny", "invite", "menu", "reload");
         else if(args.length == 2) {
             List<String> players = new ArrayList<>();
             if(args[0].equalsIgnoreCase("invite")){
