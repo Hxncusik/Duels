@@ -91,10 +91,12 @@ public class EventListener implements Listener {
         }
     }
     @EventHandler
-    public void onPlayerClickInventory(InventoryClickEvent event){
+    public void onPlayerClickInventory(InventoryClickEvent event) {
         Player player = (Player) event.getWhoClicked();
         ItemStack item = event.getCurrentItem();
-        if(item == null || item.getType() == Material.AIR) {
+        String inventoryName = event.getView().getTitle();
+
+        if (item == null || item.getType() == Material.AIR) {
             ItemStack cursor = event.getCursor();
             if (cursor == null) {
                 return;
@@ -102,178 +104,149 @@ public class EventListener implements Listener {
             if (cursor.getItemMeta().getDisplayName().contains("§fДуэли")) {
                 event.setCursor(null);
             }
+            player.updateInventory();
             return;
         }
+
         World world = player.getWorld();
         if (!world.getName().equals("world")) {
             return;
         }
+
         Inventory inventory = player.getInventory();
-        String inventoryName = event.getView().getTitle();
-        if (item.getItemMeta().getDisplayName().contains("§fАлмазник")) {
-            event.setCancelled(true);
-            Map<String, DuelsQueue> queues = Duels.getQueues();
-            DuelsQueue duelsQueue = null;
-            if(inventoryName.contains("Дуэли 1.9+ пвп")) {
-                duelsQueue = queues.get("diamond9kit");
-                if(duelsQueue == null) {
-                    duelsQueue = new DuelsQueue("diamond9kit", 16, 1);
-                    queues.put("diamond9kit", duelsQueue);
+
+        if (item.getItemMeta().getDisplayName().contains("§fАлмазник") ||
+                item.getItemMeta().getDisplayName().contains("§fЖелезник") ||
+                item.getItemMeta().getDisplayName().contains("§fЛучник")) {
+            handleKitItem(event, player, inventory, inventoryName, item);
+        } else if (item.getItemMeta().getDisplayName().contains("§fДуэли 1.8 пвп") ||
+                item.getItemMeta().getDisplayName().contains("§fДуэли 1.9+ пвп")) {
+            handleDuelItem(event, player, inventory, inventoryName);
+        } else if (item.getItemMeta().getDisplayName().contains("§eБраузер китов")) {
+            handleKitBrowserItem(event, player);
+        } else if (inventoryName.contains("§cСоздать кит")) {
+            handleCreateKitItem(event, player);
+        }
+
+        player.updateInventory();
+    }
+
+    private void handleKitItem(InventoryClickEvent event, Player player, Inventory inventory, String inventoryName, ItemStack item) {
+        event.setCancelled(true);
+        Map<String, DuelsQueue> queues = Duels.getQueues();
+        DuelsQueue duelsQueue = null;
+
+        if (inventoryName.contains("Дуэли 1.9+ пвп")) {
+            if (item.getItemMeta().getDisplayName().contains("§fАлмазник")) {
+                duelsQueue = getOrCreateDuelsQueue(queues, "diamond9kit", 16, 1);
+            } else if (item.getItemMeta().getDisplayName().contains("§fЖелезник")) {
+                duelsQueue = getOrCreateDuelsQueue(queues, "iron9kit", 16, 1);
+            } else if (item.getItemMeta().getDisplayName().contains("§fЛучник")) {
+                duelsQueue = getOrCreateDuelsQueue(queues, "bow9kit", 16, 1);
+            }
+        } else if (inventoryName.contains("Дуэли 1.8 пвп")) {
+            if (item.getItemMeta().getDisplayName().contains("§fАлмазник")) {
+                duelsQueue = getOrCreateDuelsQueue(queues, "diamond8kit", 16, 1);
+            } else if (item.getItemMeta().getDisplayName().contains("§fЖелезник")) {
+                duelsQueue = getOrCreateDuelsQueue(queues, "iron8kit", 16, 1);
+            } else if (item.getItemMeta().getDisplayName().contains("§fЛучник")) {
+                duelsQueue = getOrCreateDuelsQueue(queues, "bow8kit", 16, 1);
+            }
+        }
+
+        if (duelsQueue != null) {
+            if (!duelsQueue.isPlayerInQueue(player)) {
+                inventory.remove(player.getItemInHand());
+                inventory.setItem(8, new ItemStack(Material.REDSTONE));
+                duelsQueue.addToQueue(player);
+            }
+        }
+
+        if (inventoryName.contains("1.9+ Запрос игроку") || inventoryName.contains("1.8 Запрос игроку")) {
+            Player getter = Bukkit.getPlayer(inventoryName.split(" ")[3]);
+            PlayerChecks playerChecks = Duels.getPlayerChecks().get(getter);
+
+            if (inventoryName.contains("1.9+ Запрос игроку")) {
+                if (item.getItemMeta().getDisplayName().contains("§fАлмазник")) {
+                    duelsQueue = getOrCreateDuelsQueue(queues, "diamond9kit", 16, 1);
+                    playerChecks.addInvites(player.getName(), duelsQueue);
+                } else if (item.getItemMeta().getDisplayName().contains("§fЖелезник")) {
+                    duelsQueue = getOrCreateDuelsQueue(queues, "iron9kit", 16, 1);
+                    playerChecks.addInvites(player.getName(), duelsQueue);
+                } else if (item.getItemMeta().getDisplayName().contains("§fЛучник")) {
+                    duelsQueue = getOrCreateDuelsQueue(queues, "bow9kit", 16, 1);
+                    playerChecks.addInvites(player.getName(), duelsQueue);
                 }
-            }else if(inventoryName.contains("Дуэли 1.8 пвп")) {
-                duelsQueue = queues.get("diamond8kit");
-                if (duelsQueue == null) {
-                    duelsQueue = new DuelsQueue("diamond8kit", 16, 1);
-                    queues.put("diamond8kit", duelsQueue);
+            } else if (inventoryName.contains("1.8 Запрос игроку")) {
+                if (item.getItemMeta().getDisplayName().contains("§fАлмазник")) {
+                    duelsQueue = getOrCreateDuelsQueue(queues, "diamond8kit", 16, 1);
+                    playerChecks.addInvites(player.getName(), duelsQueue);
+                } else if (item.getItemMeta().getDisplayName().contains("§fЖелезник")) {
+                    duelsQueue = getOrCreateDuelsQueue(queues, "iron8kit", 16, 1);
+                    playerChecks.addInvites(player.getName(), duelsQueue);
+                } else if (item.getItemMeta().getDisplayName().contains("§fЛучник")) {
+                    duelsQueue = getOrCreateDuelsQueue(queues, "bow8kit", 16, 1);
+                    playerChecks.addInvites(player.getName(), duelsQueue);
                 }
             }
-            if(duelsQueue != null) {
-                if (!duelsQueue.isPlayerInQueue(player)) {
-                    inventory.remove(player.getItemInHand());
-                    inventory.setItem(8, new ItemStack(Material.REDSTONE));
-                    duelsQueue.addToQueue(player);
-                }
-            }
-            if(inventoryName.contains("1.9+ Запрос игроку")){
-                Player getter = Bukkit.getPlayer(inventoryName.split(" ")[3]);
-                PlayerChecks playerChecks = Duels.getPlayerChecks().get(getter);
-                duelsQueue = queues.get("diamond9kit");
-                if (duelsQueue == null) {
-                    duelsQueue = new DuelsQueue("diamond9kit", 16, 1);
-                    playerChecks.addInvites(player, duelsQueue);
-                    queues.put("diamond9kit", duelsQueue);
-                }
-            }else if(inventoryName.contains("1.8 Запрос игроку")){
-                Player getter = Bukkit.getPlayer(inventoryName.split(" ")[3]);
-                PlayerChecks playerChecks = Duels.getPlayerChecks().get(getter);
-                duelsQueue = queues.get("diamond8kit");
-                if (duelsQueue == null) {
-                    duelsQueue = new DuelsQueue("diamond8kit", 16, 1);
-                    playerChecks.addInvites(player, duelsQueue);
-                    queues.put("diamond8kit", duelsQueue);
-                }
-            }
-            player.closeInventory();
-        } else if (item.getItemMeta().getDisplayName().contains("§fЖелезник")) {
-            event.setCancelled(true);
-            Map<String, DuelsQueue> queues = Duels.getQueues();
-            DuelsQueue duelsQueue = null;
-            if(inventoryName.contains("Дуэли 1.9+ пвп")) {
-                duelsQueue = queues.get("iron9kit");
-                if (duelsQueue == null) {
-                    duelsQueue = new DuelsQueue("iron9kit", 16, 1);
-                    queues.put("iron9kit", duelsQueue);
-                }
-            }else if(inventoryName.contains("Дуэли 1.8 пвп")) {
-                duelsQueue = queues.get("iron8kit");
-                if (duelsQueue == null) {
-                    duelsQueue = new DuelsQueue("iron8kit", 16, 1);
-                    queues.put("iron8kit", duelsQueue);
-                }
-            }
-            if(duelsQueue != null) {
-                if (!duelsQueue.isPlayerInQueue(player)) {
-                    inventory.remove(player.getItemInHand());
-                    inventory.setItem(8, new ItemStack(Material.REDSTONE));
-                    duelsQueue.addToQueue(player);
-                }
-            }
-            if(inventoryName.contains("1.9+ Запрос игроку")){
-                Player getter = Bukkit.getPlayer(inventoryName.split(" ")[3]);
-                PlayerChecks playerChecks = Duels.getPlayerChecks().get(getter);
-                duelsQueue = queues.get("iron8kit");
-                if (duelsQueue == null) {
-                    duelsQueue = new DuelsQueue("iron9kit", 16, 1);
-                    playerChecks.addInvites(player, duelsQueue);
-                    queues.put("iron9kit", duelsQueue);
-                }
-            }else if(inventoryName.contains("1.8 Запрос игроку")){
-                Player getter = Bukkit.getPlayer(inventoryName.split(" ")[3]);
-                PlayerChecks playerChecks = Duels.getPlayerChecks().get(getter);
-                duelsQueue = queues.get("iron8kit");
-                if (duelsQueue == null) {
-                    duelsQueue = new DuelsQueue("iron8kit", 16, 1);
-                    playerChecks.addInvites(player, duelsQueue);
-                    queues.put("iron8kit", duelsQueue);
-                }
-            }
-            player.closeInventory();
-        } else if (item.getItemMeta().getDisplayName().contains("§fЛучник")) {
-            event.setCancelled(true);
-            Map<String, DuelsQueue> queues = Duels.getQueues();
-            DuelsQueue duelsQueue = null;
-            if(inventoryName.contains("Дуэли 1.9+ пвп")) {
-                duelsQueue = queues.get("bow9kit");
-                if (duelsQueue == null) {
-                    duelsQueue = new DuelsQueue("bow9kit", 16, 1);
-                    queues.put("bow9kit", duelsQueue);
-                }
-            }else if(inventoryName.contains("Дуэли 1.8 пвп")) {
-                duelsQueue = queues.get("bow8kit");
-                if (duelsQueue == null) {
-                    duelsQueue = new DuelsQueue("bow8kit", 16, 1);
-                    queues.put("bow8kit", duelsQueue);
-                }
-            }
-            if(duelsQueue != null) {
-                if (!duelsQueue.isPlayerInQueue(player)) {
-                    inventory.remove(player.getItemInHand());
-                    inventory.setItem(8, new ItemStack(Material.REDSTONE));
-                    duelsQueue.addToQueue(player);
-                }
-            }
-            if(inventoryName.contains("1.9+ Запрос игроку")){
-                Player getter = Bukkit.getPlayer(inventoryName.split(" ")[3]);
-                PlayerChecks playerChecks = Duels.getPlayerChecks().get(getter);
-                duelsQueue = queues.get("bow9kit");
-                if (duelsQueue == null) {
-                    duelsQueue = new DuelsQueue("bow9kit", 16, 1);
-                    playerChecks.addInvites(player, duelsQueue);
-                    queues.put("bow9kit", duelsQueue);
-                }
-            }else if(inventoryName.contains("1.8 Запрос игроку")){
-                Player getter = Bukkit.getPlayer(inventoryName.split(" ")[3]);
-                PlayerChecks playerChecks = Duels.getPlayerChecks().get(getter);
-                duelsQueue = queues.get("bow8kit");
-                if (duelsQueue == null) {
-                    duelsQueue = new DuelsQueue("bow8kit", 16, 1);
-                    playerChecks.addInvites(player, duelsQueue);
-                    queues.put("bow8kit", duelsQueue);
-                }
-            }
-            player.closeInventory();
-        } else if (item.getItemMeta().getDisplayName().contains("§fДуэли 1.8 пвп")){
-            event.setCancelled(true);
-            if(inventoryName.contains("1.9+")) {
+        }
+
+        player.closeInventory();
+    }
+
+    private DuelsQueue getOrCreateDuelsQueue(Map<String, DuelsQueue> queues, String queueName, int maxSize, int minPlayers) {
+        DuelsQueue duelsQueue = queues.get(queueName);
+        if (duelsQueue == null) {
+            duelsQueue = new DuelsQueue(queueName, maxSize, minPlayers);
+            queues.put(queueName, duelsQueue);
+        }
+        return duelsQueue;
+    }
+
+    private void handleDuelItem(InventoryClickEvent event, Player player, Inventory inventory, String inventoryName) {
+        event.setCancelled(true);
+        if (inventoryName.contains("Дуэли 1.8 пвп")) {
+            if (inventoryName.contains("1.9+")) {
                 Inventory duelInventory = DuelsInventory.getInventory(inventoryName.replace("1.9+", "1.8"));
                 player.openInventory(duelInventory);
             }
-        } else if (item.getItemMeta().getDisplayName().contains("§fДуэли 1.9+ пвп")){
-            event.setCancelled(true);
-            if(inventoryName.contains("1.8")) {
+        } else if (inventoryName.contains("Дуэли 1.9+ пвп")) {
+            if (inventoryName.contains("1.8")) {
                 Inventory duelInventory = DuelsInventory.getInventory(inventoryName.replace("1.8", "1.9+"));
                 player.openInventory(duelInventory);
             }
-        } else if (item.getItemMeta().getDisplayName().contains("§eБраузер китов")) {
-            event.setCancelled(true);
-            player.openInventory(BrowserInventory.getInventory());
-        } else if (item.getItemMeta().getDisplayName().contains("§fДуэли")) {
-            event.setCancelled(true);
         }
-        if (inventoryName.contains("§eБраузер китов")) {
-            event.setCancelled(true);
-            if (item.getType() == Material.IRON_PICKAXE) {
-                player.openInventory(KitCreatorInventory.getInventory());
-            }
-        } else if (inventoryName.contains("§cСоздать кит")) {
-            event.setCancelled(true);
-            if (item.getType() == Material.BEDROCK) {
-                player.getInventory().clear();
-                player.teleport(new Location(Bukkit.getWorld("world"), 1396.5, 156, 1707.5));
-                player.setGameMode(GameMode.CREATIVE);
-            }
+    }
+
+    private void handleKitBrowserItem(InventoryClickEvent event, Player player) {
+        event.setCancelled(true);
+        if (event.getCurrentItem().getType() == Material.IRON_PICKAXE) {
+            player.openInventory(KitCreatorInventory.getInventory());
         }
-        player.updateInventory();
+    }
+
+    private void handleCreateKitItem(InventoryClickEvent event, Player player) {
+        event.setCancelled(true);
+        ItemStack item = event.getCurrentItem();
+        if (item == null) {
+            return;
+        }
+        if (item.getType() == Material.BEDROCK) {
+            player.getInventory().clear();
+            player.teleport(new Location(Bukkit.getWorld("world"), 1396.5, 156, 1707.5));
+            player.setGameMode(GameMode.CREATIVE);
+        } else if (item.getType() == Material.NAME_TAG) {
+            // Handle NAME_TAG item
+        }
+    }
+
+    private boolean isNullOrEmpty(ItemStack item) {
+        return item == null || item.getType() == Material.AIR;
+    }
+
+    private boolean isWorldNameEquals(Player player, String worldName) {
+        World world = player.getWorld();
+        return world.getName().equals(worldName);
     }
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event){
