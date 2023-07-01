@@ -1,0 +1,15 @@
+name: Duels
+version: '${project.version}'
+main: kz.hxncus.mc.duels.Duels
+api-version: 1.16
+authors: [Hxncus]
+description: Дуэли для сервера MineSon
+commands:
+  spawn: {}
+  duel:
+    aliases:
+      - duels
+      - ds
+      - dl
+      - deul
+      - deuls
