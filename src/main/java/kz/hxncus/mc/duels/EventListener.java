@@ -136,22 +136,25 @@ public class EventListener implements Listener {
         Map<String, DuelsQueue> queues = Duels.getQueues();
         DuelsQueue duelsQueue = null;
 
-        if (inventoryName.contains("Дуэли 1.9+ пвп")) {
-            if (item.getItemMeta().getDisplayName().contains("§fАлмазник")) {
-                duelsQueue = getOrCreateDuelsQueue(queues, "diamond9kit", 16, 1);
-            } else if (item.getItemMeta().getDisplayName().contains("§fЖелезник")) {
-                duelsQueue = getOrCreateDuelsQueue(queues, "iron9kit", 16, 1);
-            } else if (item.getItemMeta().getDisplayName().contains("§fЛучник")) {
-                duelsQueue = getOrCreateDuelsQueue(queues, "bow9kit", 16, 1);
+        String queueName = "null";
+        if (item.getItemMeta().getDisplayName().contains("§fАлмазник")) {
+            queueName = "diamond9kit";
+            if (inventoryName.contains("Дуэли 1.8 пвп")) {
+                queueName = "diamond8kit";
             }
-        } else if (inventoryName.contains("Дуэли 1.8 пвп")) {
-            if (item.getItemMeta().getDisplayName().contains("§fАлмазник")) {
-                duelsQueue = getOrCreateDuelsQueue(queues, "diamond8kit", 16, 1);
-            } else if (item.getItemMeta().getDisplayName().contains("§fЖелезник")) {
-                duelsQueue = getOrCreateDuelsQueue(queues, "iron8kit", 16, 1);
-            } else if (item.getItemMeta().getDisplayName().contains("§fЛучник")) {
-                duelsQueue = getOrCreateDuelsQueue(queues, "bow8kit", 16, 1);
+            duelsQueue = getOrCreateDuelsQueue(queues, queueName, 16, 1);
+        } else if (item.getItemMeta().getDisplayName().contains("§fЖелезник")) {
+            queueName = "iron9kit";
+            if (inventoryName.contains("Дуэли 1.8 пвп")) {
+                queueName = "iron8kit";
             }
+            duelsQueue = getOrCreateDuelsQueue(queues, queueName, 16, 1);
+        } else if (item.getItemMeta().getDisplayName().contains("§fЛучник")) {
+            queueName = "bow9kit";
+            if (inventoryName.contains("Дуэли 1.8 пвп")) {
+                queueName = "bow8kit";
+            }
+            duelsQueue = getOrCreateDuelsQueue(queues, queueName, 16, 1);
         }
 
         if (duelsQueue != null) {
@@ -161,36 +164,30 @@ public class EventListener implements Listener {
                 duelsQueue.addToQueue(player);
             }
         }
-
-        if (inventoryName.contains("1.9+ Запрос игроку") || inventoryName.contains("1.8 Запрос игроку")) {
-            Player getter = Bukkit.getPlayer(inventoryName.split(" ")[3]);
-            PlayerChecks playerChecks = Duels.getPlayerChecks().get(getter);
-
-            if (inventoryName.contains("1.9+ Запрос игроку")) {
-                if (item.getItemMeta().getDisplayName().contains("§fАлмазник")) {
-                    duelsQueue = getOrCreateDuelsQueue(queues, "diamond9kit", 16, 1);
-                    playerChecks.addInvites(player.getName(), duelsQueue);
-                } else if (item.getItemMeta().getDisplayName().contains("§fЖелезник")) {
-                    duelsQueue = getOrCreateDuelsQueue(queues, "iron9kit", 16, 1);
-                    playerChecks.addInvites(player.getName(), duelsQueue);
-                } else if (item.getItemMeta().getDisplayName().contains("§fЛучник")) {
-                    duelsQueue = getOrCreateDuelsQueue(queues, "bow9kit", 16, 1);
-                    playerChecks.addInvites(player.getName(), duelsQueue);
-                }
-            } else if (inventoryName.contains("1.8 Запрос игроку")) {
-                if (item.getItemMeta().getDisplayName().contains("§fАлмазник")) {
-                    duelsQueue = getOrCreateDuelsQueue(queues, "diamond8kit", 16, 1);
-                    playerChecks.addInvites(player.getName(), duelsQueue);
-                } else if (item.getItemMeta().getDisplayName().contains("§fЖелезник")) {
-                    duelsQueue = getOrCreateDuelsQueue(queues, "iron8kit", 16, 1);
-                    playerChecks.addInvites(player.getName(), duelsQueue);
-                } else if (item.getItemMeta().getDisplayName().contains("§fЛучник")) {
-                    duelsQueue = getOrCreateDuelsQueue(queues, "bow8kit", 16, 1);
-                    playerChecks.addInvites(player.getName(), duelsQueue);
-                }
+        Player getter = Bukkit.getPlayer(inventoryName.split(" ")[3]);
+        PlayerChecks playerChecks = Duels.getPlayerChecks().get(getter);
+        if (item.getItemMeta().getDisplayName().contains("§fАлмазник")) {
+            queueName = "diamond9kit";
+            if (inventoryName.contains("1.8 Запрос игроку")) {
+                queueName = queueName.replace("9", "8");
+            }
+        } else if (item.getItemMeta().getDisplayName().contains("§fЖелезник")) {
+            queueName = "iron9kit";
+            if (inventoryName.contains("1.8 Запрос игроку")) {
+                queueName = queueName.replace("9", "8");
+            }
+        } else if (item.getItemMeta().getDisplayName().contains("§fЛучник")) {
+            queueName = "bow9kit";
+            if (inventoryName.contains("1.8 Запрос игроку")) {
+                queueName = queueName.replace("9", "8");
             }
         }
-
+        if (queueName.equals("null")) {
+            player.closeInventory();
+            return;
+        }
+        duelsQueue = getOrCreateDuelsQueue(queues, queueName, 16, 1);
+        playerChecks.addInvites(player.getName(), duelsQueue);
         player.closeInventory();
     }
 
