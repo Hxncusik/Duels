@@ -12,7 +12,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -23,21 +22,15 @@ public class DuelsQueue {
     private final Queue<Player> queue;
     private final Map<Player, DuelsArenas> game;
     private final String queueName;
-    private final int maxQueueSize;
     private final int teamSize;
 
-    public DuelsQueue(String queueName, int maxQueueSize, int teamSize) {
+    public DuelsQueue(String queueName, int teamSize) {
         this.queue = new LinkedList<>();
         this.game = new HashMap<>();
         this.queueName = queueName;
-        this.maxQueueSize = maxQueueSize;
         this.teamSize = teamSize;
     }
     public void addToQueue(Player player) {
-        if(queue.size() >= maxQueueSize) {
-            player.sendMessage("The queue is full. Please wait for a match.");
-            return;
-        }
         PlayerChecks checks = Duels.getPlayerChecks().get(player);
         checks.setQueue(this);
         queue.add(player);
