@@ -1,4 +1,4 @@
-package kz.hxncus.mc.duels.commands;
+package kz.hxncus.mc.duels.command;
 
 import kz.hxncus.mc.duels.Duels;
 import org.bukkit.command.*;

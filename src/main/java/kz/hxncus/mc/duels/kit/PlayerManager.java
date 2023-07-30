@@ -1,4 +1,4 @@
-package kz.hxncus.mc.duels.kits;
+package kz.hxncus.mc.duels.kit;
 
 import kz.hxncus.mc.duels.Duels;
 

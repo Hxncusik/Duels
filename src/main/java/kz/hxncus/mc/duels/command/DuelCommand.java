@@ -1,9 +1,10 @@
-package kz.hxncus.mc.duels.commands;
+package kz.hxncus.mc.duels.command;
 
 import com.google.common.collect.Lists;
 import kz.hxncus.mc.duels.Duels;
 import kz.hxncus.mc.duels.DuelsQueue;
 import kz.hxncus.mc.duels.PlayerChecks;
+import kz.hxncus.mc.duels.YML;
 import kz.hxncus.mc.duels.inventory.DuelsInventory;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -26,7 +27,7 @@ public class DuelCommand extends AbstractCommand{
             return;
         }
         Player player = (Player) sender;
-        PlayerChecks playerChecks = Duels.getPlayerChecks().get(player);
+        PlayerChecks playerChecks = PlayerChecks.getPlayerChecks(sender.getName());
         if (checkDuelsQueue(player, playerChecks)) return;
         switch (args[0].toLowerCase()) {
             case "invite":
@@ -86,8 +87,9 @@ public class DuelCommand extends AbstractCommand{
     private void reload(Player player) {
         if (!player.hasPermission("duel.reload")) {
             player.sendMessage(duelPrefix + "§cНедостаточно прав");
+            return;
         }
-        Duels.getInstance().reloadConfig();
+        YML.setup("config", false);
         player.sendMessage(duelPrefix + "§fКонфиг успешно перезагружен.");
     }
     private boolean checkDuelsQueue(Player player, PlayerChecks playerChecks) {
@@ -126,7 +128,7 @@ public class DuelCommand extends AbstractCommand{
             if(args[0].equalsIgnoreCase("invite")){
                 Bukkit.getOnlinePlayers().stream().filter(player -> player != sender).forEach(player -> players.add(player.getName()));
             }else if(args[0].equalsIgnoreCase("accept") || args[0].equalsIgnoreCase("deny")){
-                players.addAll(Duels.getPlayerChecks().get((Player) sender).getKeySetInvites());
+                players.addAll(PlayerChecks.getPlayerChecks(sender.getName()).getKeySetInvites());
             }
             return players;
         }

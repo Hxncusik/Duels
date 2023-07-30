@@ -1,4 +1,4 @@
-package kz.hxncus.mc.duels.commands;
+package kz.hxncus.mc.duels.command;
 
 import kz.hxncus.mc.duels.Duels;
 import kz.hxncus.mc.duels.DuelsArenas;
@@ -23,25 +23,27 @@ public class SpawnCommand extends AbstractCommand{
     public void execute(CommandSender sender, String label, String[] args){
         if(sender instanceof Player){
             Player player = (Player) sender;
-            PlayerChecks playerChecks = Duels.getPlayerChecks().get(player);
+            PlayerChecks playerChecks = PlayerChecks.getPlayerChecks(sender.getName());
             DuelsQueue duelsQueue = playerChecks.getQueue();
             Inventory inventory = player.getInventory();
             player.setGameMode(GameMode.SURVIVAL);
             inventory.clear();
             inventory.setItem(0, ItemStacker.setDisplayName(new ItemStack(Material.IRON_SWORD), "§fДуэли"));
             player.teleport(new Location(Bukkit.getWorld("world"), 1422.5, 159, 1729.5));
-            if (duelsQueue != null && duelsQueue.isPlayerInGame(player)) {
-                Map<Player, DuelsArenas> game = duelsQueue.getGame();
-                Iterator<Player> iterator = game.keySet().iterator();
-                duelsQueue.removeFromGame(player);
-                while (iterator.hasNext()) {
-                    Player key = iterator.next();
-                    if (key != player && game.get(key) == game.get(player)) {
-                        iterator.remove();
-                        duelsQueue.removeFromGame(key);
-                        game.get(player).setAvailable(true);
-                    }
+            if (duelsQueue == null || !duelsQueue.isPlayerInGame(player)) {
+                return;
+            }
+            Map<Player, DuelsArenas> game = duelsQueue.getGame();
+            Iterator<Player> iterator = game.keySet().iterator();
+            duelsQueue.removeFromGame(player);
+            while (iterator.hasNext()) {
+                Player key = iterator.next();
+                if (key == player || game.get(key) != game.get(player)) {
+                    continue;
                 }
+                iterator.remove();
+                duelsQueue.removeFromGame(key);
+                game.get(player).setAvailable(true);
             }
         }
     }

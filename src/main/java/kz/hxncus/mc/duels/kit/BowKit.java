@@ -1,4 +1,4 @@
-package kz.hxncus.mc.duels.kits;
+package kz.hxncus.mc.duels.kit;
 
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
