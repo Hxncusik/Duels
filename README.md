@@ -1,1 +1,1 @@
-<a href="https://www.codefactor.io/repository/github/naruto2007/duels"><img src="https://www.codefactor.io/repository/github/naruto2007/duels/badge" alt="CodeFactor" /></a>
+[![CodeFactor](https://www.codefactor.io/repository/github/hxncusik/duels/badge)](https://www.codefactor.io/repository/github/hxncusik/duels)
